@@ -1,0 +1,11 @@
+\documentclass{article}
+
+<<global_options, include = F>>=
+knitr::opts_chunk$set(warning = F, message = F)
+@
+
+\begin{document}
+
+Hello, World!
+
+\end{document}
