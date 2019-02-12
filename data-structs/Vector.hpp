@@ -3,6 +3,7 @@
 #include "./../compat/compat.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <cctype>
 #include <iterator>
 #include <memory>
