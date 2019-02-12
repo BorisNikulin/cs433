@@ -1,1 +1,6 @@
 *.tex
+figure/*
+report.pdf
+
+*.csv
+ready_queue_test

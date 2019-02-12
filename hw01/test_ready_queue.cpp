@@ -126,7 +126,7 @@ namespace test { namespace ready_queue
 		}
 
 		cout << "Benchmark start\n";
-		for(int n = 1; n <= 10; ++n)
+		for(int n = 1; n <= 20; ++n)
 		{
 			using namespace std::chrono;
 

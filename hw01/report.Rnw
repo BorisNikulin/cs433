@@ -1,11 +1,163 @@
 \documentclass{article}
 
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{siunitx}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan!80!black,
+    citecolor=orange!80!black,
+}
+
+\DeclareMathOperator{\bigO}{\mathcal{O}}
+
 <<global_options, include = F>>=
 knitr::opts_chunk$set(warning = F, message = F)
+#knitr::opts_chunk$set(tidy = function(code, ...){gsub('\t', '    ', code)})
+knitr::opts_chunk$set(fig.align = 'center', fig.width = 4)
+par(mar = c(4, 4, 0.5, 0.5))
 @
+
+\title{CS 433 (2) HW1 Report}
+\date{2019-02-11}
+\author{Boris Nikulin}
 
 \begin{document}
 
-Hello, World!
+\maketitle
+\tableofcontents
+
+\section{Data Analysis}
+
+
+\subsection{Data Import}
+
+First we load the benchmark data and give the data a once over.
+
+<<load-data>>=
+library(readr)
+library(dplyr)
+library(magrittr)
+
+data <- read_csv('./bench_ready_queue.csv',
+    col_types = cols(
+        run = col_integer(),
+        time = col_integer()
+    )
+)
+
+data %<>% mutate(run = as.factor(run))
+
+glimpse(data, width = 60)
+@
+
+
+First we compute a summary and standard deviation of the times.
+The times are in milliseconds.
+
+<<data-summary>>=
+summary(data$time)
+sd(data$time)
+@
+
+
+\subsection{Data Visualization}
+
+Next we plot the data as a bar plot, a box plot, and as a density plot.
+
+<<data-plot-bar>>=
+library(ggplot2)
+
+ggplot(data, aes(run, time)) +
+    geom_bar(stat = 'identity') +
+    labs(x = 'Run', y = 'Time (ms)') +
+    theme(aspect.ratio = 0.5)
+@
+
+The box plot displays the raw data.
+The raw data shows that the runs do not vary by much.
+
+<<data-plot-box, out.width = "0.6\\textwidth">>=
+ggplot(data, aes(1, time)) +
+    geom_boxplot() +
+    coord_flip() +
+    labs(y = 'Time (ms)') +
+    theme(aspect.ratio = 0.25, axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+@
+
+The box plot shows some runs have comparatively larger spikes due to a noisy test environment.
+
+
+<<data-plot-density, fig.pos = 'th'>>=
+ggplot(data, aes(time)) +
+    geom_density() +
+    labs(x = 'Density', y = 'Time (ms)') +
+    theme(aspect.ratio = 0.5)
+@
+
+The density plot confirms the data is right skewed which is to be expected.
+Sometimes the computer is busy and causes extra delays in the benchmark.
+Conversely, a computer can not drastically increase speed.
+Thus, the data is usually around the median but skews right.
+
+
+\subsection{Conclusion}
+
+The median is likely to be more resistant to benchmark computer slow downs
+and is \SI{\Sexpr{median(data$time)}}{\ms}.
+For completeness it is important to note the average of \SI{\Sexpr{round(mean(data$time), digits = 2)}}{\ms}
+with a standard deviation of \SI{\Sexpr{round(sd(data$time), digits = 2)}}{\ms}.
+
+
+\section{Data Structure Choice}
+
+\subsection{Rational}
+
+I chose a binary heap for the ready queue.
+A binary heap is a good choice for a priority queue because insertion and deletion is $\bigO(\log n)$.
+Once inserted, finding the max or min element is $\bigO(1)$.
+These two properties are why a binary heap make good priority queues.
+
+\subsection{Implementation}
+
+For my implementation I tried to model the Standard Template Library (STL),
+except for allocators.
+The data structures I made can be used in functions of the C++ \texttt{algorithm} header, where applicable,
+primarily by giving my structures STL compatible iterators.
+
+The priority queue backing the ready queue is made similarly to the STL \texttt{priority\_queue},
+where I implemented the priority queue as an adaptor on top of an existing container through random access iterators.
+The priory queue is backed, by default, by my \texttt{Vector}.
+The elements are inserted according to a max heap through the use of iterator aware heap algorithms.
+The priority queue is a max binary heap.
+
+
+\section{Empirical and Theoretical Results Compared}
+
+Since the ready queue is backed by a binary heap, I do not expect the time to be too high.
+Using ``Latency Numbers Every Programmer Should Know'' with the year 2019,
+one can expect an L1 cache hit to be \SI{1}{\ns}.
+Taking into account large modern L1 cache size and the fact that the benchmark is only using 20 PCBs,
+it is reasonable to expect most, if not all, access of the data to be an L1 cache hit.
+Adding or removing a node requires following a pointer so there are at least a million L1 cache hits
+or \SI{1}{\ms}.
+Adding requires, at worst, traversing through $\log_2(20) = 4.32$ elements and potentially branching.
+A branch miss prediction is \SI{7}{\ns}.
+If all 4.32 comparisons are miss predicted that would be $7 \cdot 4.32 = \SI{30.24}{\ms}$
+plus the L1 cache hits of \SI{4.32}{\ms}.
+The current total is \SI{35.56}{\ms}.
+Although only 50\% of the time one adds,
+this still shows that the rough estimate of the time should be in the 50's of \si{\ms}.
+
+This very rough ballpark estimate shows that around \SI{50}{\ms} should be expected and is what the benchmark got.
+
 
 \end{document}
