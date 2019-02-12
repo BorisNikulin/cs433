@@ -1,3 +1,7 @@
+## C/++
+*.o
+*.gch
+
 ## Latex (from github's tex gitignore
 ## Core latex/pdflatex auxiliary files:
 *.aux
