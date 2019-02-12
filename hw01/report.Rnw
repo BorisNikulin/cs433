@@ -99,7 +99,7 @@ The box plot shows some runs have comparatively larger spikes due to a noisy tes
 <<data-plot-density, fig.pos = 'th'>>=
 ggplot(data, aes(time)) +
     geom_density() +
-    labs(x = 'Density', y = 'Time (ms)') +
+    labs(x = 'Time (ms)', y = 'Density') +
     theme(aspect.ratio = 0.5)
 @
 
@@ -149,15 +149,26 @@ Taking into account large modern L1 cache size and the fact that the benchmark i
 it is reasonable to expect most, if not all, access of the data to be an L1 cache hit.
 Adding or removing a node requires following a pointer so there are at least a million L1 cache hits
 or \SI{1}{\ms}.
-Adding requires, at worst, traversing through $\log_2(20) = 4.32$ elements and potentially branching.
+Adding to the ready queue requires, at worst, traversing through $\log_2 20 = 4.32$ elements and potentially branching.
 A branch miss prediction is \SI{7}{\ns}.
-If all 4.32 comparisons are miss predicted that would be $7 \cdot 4.32 = \SI{30.24}{\ms}$
+If all 4.32 comparisons are miss predicted one million times, then that would be $7 \cdot 4.32 = \SI{30.24}{\ms}$
 plus the L1 cache hits of \SI{4.32}{\ms}.
-The current total is \SI{35.56}{\ms}.
+To find which PCB to add, I do a linear search of at most 20 elements.
+This adds twenty million L1 cache hits roughly or \SI{20}{\ms}.
+The current total is \SI{55.56}{\ms}.
 Although only 50\% of the time one adds,
 this still shows that the rough estimate of the time should be in the 50's of \si{\ms}.
+The other half of the time we remove which is similar to adding,
+but does include a linear search into the PCB table to find something to add.
+This comes to the same $7 \cdot 4.32 + 4.32 = \SI{34.56}{\ms}$.
 
-This very rough ballpark estimate shows that around \SI{50}{\ms} should be expected and is what the benchmark got.
+This very rough ballpark estimate shows that around \SI{50}{\ms} should be expected
+and is in the same ball park as the benchmark.
+
+\section{Post Script}
+
+The test data was much more interesting on my laptop (around \SI{50}{\ms}).
+The graphs now seem pointless \ldots
 
 
 \end{document}
