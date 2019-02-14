@@ -97,7 +97,7 @@ ggplot(data, aes(1, time)) +
 
 The box plot shows very stable benchmark results.
 
-<<data-plot-density, fig.pos = 'th'>>=
+<<data-plot-density>>=
 ggplot(data, aes(time)) +
     geom_density() +
     labs(x = 'Time (ms)', y = 'Density')
@@ -143,8 +143,8 @@ The priority queue is a max binary heap.
 Since the ready queue is backed by a binary heap, I do not expect the time to be too high.
 Using ``Latency Numbers Every Programmer Should Know'' with the year 2019,
 one can expect an L1 cache hit to be \SI{1}{\ns}.
-Taking into account large modern L1 cache size and the fact that the benchmark is only using 20 PCBs,
-it is reasonable to expect most, if not all, access of the data to be an L1 cache hit.
+Taking into account large modern L1 cache sizes and the fact that the benchmark is only using 20 PCBs,
+it is reasonable to expect most, if not all, accesses of the data to be an L1 cache hit.
 Adding or removing a node requires following a pointer so there are at least a million L1 cache hits
 or \SI{1}{\ms}.
 Adding to the ready queue requires, at worst, traversing through $\log_2 20 = 4.32$ elements and potentially branching.
