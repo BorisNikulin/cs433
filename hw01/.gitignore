@@ -3,3 +3,5 @@ figure/*
 
 *.csv
 ready_queue_test
+
+build/*
