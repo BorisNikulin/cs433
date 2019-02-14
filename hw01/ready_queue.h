@@ -12,6 +12,8 @@ namespace os { namespace proc
 	{
 		private:
 			using pcb_compare = std::function<bool(PCB*, PCB*)>;
+			// reverses max heap to a min heap
+			// assumes non null pointers
 			pcb_compare comp = [](PCB* p1, PCB* p2) -> bool { return *p1 > *p2; };
 
 			using PriorityQueue = typename ::ds::container::PriorityQueue<
