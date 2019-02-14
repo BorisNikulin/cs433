@@ -5,7 +5,7 @@
 \usepackage{mathtools}
 \usepackage{siunitx}
 
-\usepackage{xcolor}
+\usepackage[usenames, dvipsnames]{xcolor}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
@@ -19,9 +19,7 @@
 
 <<global_options, include = F>>=
 knitr::opts_chunk$set(warning = F, message = F)
-#knitr::opts_chunk$set(tidy = function(code, ...){gsub('\t', '    ', code)})
-knitr::opts_chunk$set(fig.align = 'center', fig.width = 4)
-par(mar = c(4, 4, 0.5, 0.5))
+knitr::opts_chunk$set(fig.align = 'center', fig.width = 4, fig.height = 3)
 @
 
 \title{CS 433 (2) HW1 Report}
@@ -83,30 +81,30 @@ ggplot(data, aes(run, time)) +
 The box plot displays the raw data.
 The raw data shows that the runs do not vary by much.
 
-<<data-plot-box, out.width = "0.6\\textwidth">>=
+<<data-plot-box, fig.width = 4>>=
 ggplot(data, aes(1, time)) +
     geom_boxplot() +
     coord_flip() +
     labs(y = 'Time (ms)') +
-    theme(aspect.ratio = 0.25, axis.title.y = element_blank(),
+    theme(aspect.ratio = 0.25,
+        # x axis was being cut off on the right
+        plot.margin = margin(r = 16),
+        axis.title.y = element_blank(),
         axis.text.y = element_blank(),
-        axis.ticks.y = element_blank())
+        axis.ticks.y = element_blank()
+   )
 @
 
-The box plot shows some runs have comparatively larger spikes due to a noisy test environment.
-
+The box plot shows very stable benchmark results.
 
 <<data-plot-density, fig.pos = 'th'>>=
 ggplot(data, aes(time)) +
     geom_density() +
-    labs(x = 'Time (ms)', y = 'Density') +
-    theme(aspect.ratio = 0.5)
+    labs(x = 'Time (ms)', y = 'Density')
 @
 
-The density plot confirms the data is right skewed which is to be expected.
-Sometimes the computer is busy and causes extra delays in the benchmark.
-Conversely, a computer can not drastically increase speed.
-Thus, the data is usually around the median but skews right.
+
+The density plot further shows the uniformness of the data.
 
 
 \subsection{Conclusion}
@@ -119,7 +117,7 @@ with a standard deviation of \SI{\Sexpr{round(sd(data$time), digits = 2)}}{\ms}.
 
 \section{Data Structure Choice}
 
-\subsection{Rational}
+\subsection{Rationale}
 
 I chose a binary heap for the ready queue.
 A binary heap is a good choice for a priority queue because insertion and deletion is $\bigO(\log n)$.
@@ -167,7 +165,8 @@ and is in the same ball park as the benchmark.
 
 \section{Post Script}
 
-The test data was much more interesting on my laptop (around \SI{50}{\ms}).
+The test data was much more interesting on my laptop
+(around \SI{50}{\ms} with standard deviations of \SIrange{0.5}{5}{\ms} forming a right skewed distribution).
 The graphs now seem pointless \ldots
 
 

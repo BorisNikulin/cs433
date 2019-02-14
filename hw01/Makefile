@@ -29,5 +29,6 @@ report.pdf: report.tex
 clean:
 	-latexmk -c
 	-rm *.tex
+	-rm -rf figures
 	-rm *.o
 	-rm ready_queue_test
