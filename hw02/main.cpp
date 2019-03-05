@@ -43,5 +43,10 @@ int main()
 		returnVal = ret.second;
 	} while(!doQuit && !std::cin.eof());
 
+	if(std::cin.eof())
+	{
+		std::cout << "exit\n";
+	}
+
 	return returnVal;
 }
