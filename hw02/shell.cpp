@@ -51,13 +51,6 @@ namespace shell
 				break;
 		}
 
-		std::cout << "command: ";
-		for(auto s : cmd.show())
-		{
-			std::cout << s << " ";
-		}
-		std::cout << "\n";
-
 		return ret;
 	}
 
@@ -92,18 +85,7 @@ namespace shell
 		{
 			try
 			{
-				const auto& cmd = history.at(histIndex);
-
-				// prevent self loop seg fault
-				if(cmd.tag == Command::BUILT_IN
-					&& cmd.data.built_in.tag == BuiltIn::HISTORY
-					&& cmd.data.built_in.data.histIndex == histIndex)
-				{
-					//std::cout << "lol\n";
-					return {false, 1};
-				}
-
-				return runCommand(cmd);
+				return runCommand(history.at(histIndex));
 			}
 			catch(const std::out_of_range&)
 			{
