@@ -37,10 +37,11 @@ int main()
 	{
 		std::cout << "bsh> ";
 		std::getline(std::cin, inLine);
+
 		auto ret = shell.processCommand(inLine);
 		doQuit = ret.first;
 		returnVal = ret.second;
-	} while(!doQuit);
+	} while(!doQuit && !std::cin.eof());
 
 	return returnVal;
 }

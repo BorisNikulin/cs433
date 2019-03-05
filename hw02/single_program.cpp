@@ -21,7 +21,7 @@ namespace shell
 		delete[] prog;
 	}
 
-	void SingleProgram::run()
+	void SingleProgram::run() const
 	{
 		pid_t pid = fork();
 

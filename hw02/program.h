@@ -17,7 +17,7 @@ namespace shell
 
 			virtual ~Program() = default;
 
-			virtual void run() = 0;
+			virtual void run() const = 0;
 			virtual std::deque<std::string> show() = 0;
 	};
 }

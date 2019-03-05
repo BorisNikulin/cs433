@@ -35,7 +35,7 @@ namespace shell
 
 			virtual ~SingleProgram() override;
 
-			virtual void run() override;
+			virtual void run() const override;
 			virtual std::deque<std::string> show() override;
 	};
 

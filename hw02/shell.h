@@ -15,8 +15,9 @@ namespace shell
 		private:
 			std::deque<Command> history;
 
-			std::pair<bool, int> processBuiltIn(const BUILT_IN builtIn);
-			std::pair<bool, int> processProgram(Program* cmd);
+			std::pair<bool, int> runCommand(Command cmd);
+			std::pair<bool, int> runBuiltIn(const BuiltIn builtIn);
+			std::pair<bool, int> runProgram(const Program* cmd);
 
 		public:
 			std::pair<bool, int> processCommand(const std::string& cmdStr);

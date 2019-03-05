@@ -1,19 +1,53 @@
 #include "built_in.h"
 
 #include <string>
+#include <sstream>
+
+#include <iostream>
 
 namespace shell
 {
-	std::string builtInToString(const BUILT_IN builtIn)
+	BuiltIn& BuiltIn::operator=(const BuiltIn& builtIn)
 	{
-		switch(builtIn)
+		tag = builtIn.tag;
+		switch(tag)
 		{
-			case BUILT_IN::EXIT:
-				return "exit";
-			case BUILT_IN::HISTORY:
-				return "history";
+			case HISTORY:
+				data.histIndex = builtIn.data.histIndex;
+				break;
+			case BUILT_IN_ERROR:
+				//std::cout << "copy: " << builtIn.data.what << "\n";
+				new(&data.what) std::string(builtIn.data.what);
+				break;
 			default:
-				return "Unkown BUILT_IN";
-		}			
+				break;
+		}
+		return *this;
+	}
+
+
+	std::string BuiltIn::toString() const
+	{
+		switch(tag)
+		{
+			case BuiltIn::NO_COMMAND:
+				return "empty command";
+			case BuiltIn::EXIT:
+				return "exit";
+			case BuiltIn::HISTORY:
+			{
+				std::ostringstream ss;
+				ss << "history";
+				if(data.histIndex >= 0)
+				{
+					ss << " " << data.histIndex;
+				}
+				return ss.str();
+			}
+			case BuiltIn::BUILT_IN_ERROR:
+				return data.what;
+			default:
+				return "Unknown BUILT_IN";
+		}
 	}
 }

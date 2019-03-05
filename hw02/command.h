@@ -19,21 +19,25 @@ namespace shell
 
 		TAG tag;
 
-		union data
+		union Data
 		{
-			enum BUILT_IN built_in;
+			BuiltIn built_in;
 			// program is abstract and needs to be a pointer
 			Program* program;//= nullptr;
+
+			Data() {}
+			~Data() {}
 		} data;
 
-		Command() : tag(BUILT_IN) {}
-		~Command()
-		{ if(tag == PROGRAM) delete data.program; }
+		Command() : tag(BUILT_IN)
+		{ data.built_in = BuiltIn{}; }
+
+		~Command();
 
 		Command& operator=(Command&& cmd);
 		Command(Command&& cmd)
 		{ *this = std::move(cmd); };
 
-		std::deque<std::string> show();
+		std::deque<std::string> show() const;
 	};
 }

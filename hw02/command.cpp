@@ -5,24 +5,47 @@
 
 namespace shell
 {
+		Command::~Command()
+		{
+			switch(tag){
+				case BUILT_IN:
+					data.built_in.~BuiltIn();
+					break;
+				case PROGRAM:
+					delete data.program;
+					break;
+			}
+		}
+
 		Command& Command::operator=(Command&& cmd)
 		{
 			tag = cmd.tag;
-			data = cmd.data;
+			switch(tag)
+			{
+				case BUILT_IN:
+					data.built_in = cmd.data.built_in;
+					break;
+				case PROGRAM:
+					data.program = cmd.data.program;
+					break;
+				default:
+					break;
+			}
 
 			cmd.tag = Command::BUILT_IN;
+			cmd.data.program = nullptr;
 
 			return *this;
 		}
 
-		std::deque<std::string> Command::show()
+		std::deque<std::string> Command::show() const
 		{
 			std::deque<std::string> args;
 
 			switch(tag)
 			{
 				case Command::BUILT_IN:
-					args.push_back(builtInToString(data.built_in));
+					args.push_back(data.built_in.toString());
 					break;
 				case Command::PROGRAM:
 					args = data.program->show();
