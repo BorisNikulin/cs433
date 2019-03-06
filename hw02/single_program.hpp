@@ -42,7 +42,7 @@ namespace shell
 			 *
 			 * \param start starting forward iterator to std::string
 			 * \param end ending forward iterator to std::string
-			 * \param size number of elements in the range [\p start, \p end)
+				* \param size number of elements in the range [\p start, \p end)
 			 */
 			template<typename ForwardIt, typename size_type>
 			SingleProgram(
@@ -74,7 +74,7 @@ namespace shell
 			++currentArg;
 		}
 
-		currentArg = nullptr;
+		*currentArg = nullptr;
 	}
 
 }
