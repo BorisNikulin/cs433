@@ -40,8 +40,8 @@ namespace shell
 			 * and then a size that corresponds to the number of elements in the range.
 			 * Thus, the size must be equal to `std::distance(start, end)`.
 			 *
-			 * \param start starting forward iterator to std::string
-			 * \param end ending forward iterator to std::string
+			 * \param start starting forward iterator to std::string.
+			 * \param end ending forward iterator to std::string.
 				* \param size number of elements in the range [\p start, \p end)
 			 */
 			template<typename ForwardIt, typename size_type>
