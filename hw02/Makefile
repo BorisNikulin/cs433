@@ -2,7 +2,11 @@ CCX = g++
 CXXFLAGS = -std=c++11 -Wall -O3
 
 .PHONY: all
-all: bsh report.pdf
+all: bsh documentation report.pdf
+
+.PHONY: documentation
+documentation: Doxyfile *.h *.hpp *.cpp
+	doxygen
 
 shell.o: shell.cpp parser.h command.h
 	$(CXX) $(CXXFLAGS) -c $<

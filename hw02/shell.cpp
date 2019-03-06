@@ -1,21 +1,21 @@
 #include "shell.h"
 
-#include "parser.h"
 #include "command.h"
+#include "parser.h"
 
-#include <iostream>
+#include <cmath>
+#include <cstdlib>
 #include <iomanip>
+#include <iostream>
+#include <stdexcept>
 #include <string>
 #include <utility>
-#include <cstdlib>
-#include <stdexcept>
-#include <cmath>
 
 namespace shell
 {
 	std::pair<bool, int> Shell::processCommand(const std::string& cmdStr)
 	{
-		Command cmd = parseCommand(cmdStr);
+		Command cmd = parse::parseCommand(cmdStr);
 
 		// allow only stricly monotonically decreasing history references to prevent loops and thus segfaults
 		if(cmd.tag == Command::BUILT_IN

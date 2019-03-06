@@ -8,7 +8,18 @@
 
 namespace shell
 {
-	// low level sum type of a built in command and a runnable program
+	/// Sum type for built in commands and programs.
+	/**
+	 * tag determines the type of the sum type or tagged union.
+	 *
+	 * Care must be taken when accessing Command::data to ensure
+	 * the proper type of variable is being accessed,
+	 *
+	 * Command is not copy constructable or assignable.
+	 * There must be no aliases.
+	 *
+	 * \sa BuiltIn, Program
+	 */
 	struct Command
 	{
 
@@ -38,6 +49,7 @@ namespace shell
 		Command(Command&& cmd)
 		{ *this = std::move(cmd); };
 
+		/// Obtains a command in the form of a list of space separated elements for displaying.
 		std::deque<std::string> show() const;
 	};
 }

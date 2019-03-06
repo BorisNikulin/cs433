@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-namespace shell
+namespace shell { namespace parse
 {
 	Command parseCommand(const std::string cmdStr)
 	{
@@ -118,4 +118,4 @@ namespace shell
 
 		return cmd;
 	}
-}
+} }

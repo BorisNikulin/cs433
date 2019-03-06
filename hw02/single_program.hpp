@@ -10,6 +10,7 @@
 
 namespace shell
 {
+
 	template<typename Iter, typename T>
 	using IterWithValueType =
 		typename std::enable_if<
@@ -20,22 +21,41 @@ namespace shell
 			Iter
 		>::type;
 
+	/// A Program consisting of one and only one executable.
+	/**
+	 * The class encapsulates a single executable such as `echo foo`.
+	 *
+	 * This class forms the basis for any executable commands.
+	 */
 	class SingleProgram : public Program
 	{
-		public:
+		private:
 			char** prog;
 
 		public:
 
+			/// Construct using a list of string arguments and the number of arguments.
+			/**
+			 * The constructor takes a \p start and \p end pair of iterators to a value type of string
+			 * and then a size that corresponds to the number of elements in the range.
+			 * Thus, the size must be equal to `std::distance(start, end)`.
+			 *
+			 * \param start starting forward iterator to std::string
+			 * \param end ending forward iterator to std::string
+			 * \param size number of elements in the range [\p start, \p end)
+			 */
 			template<typename ForwardIt, typename size_type>
 			SingleProgram(
 				IterWithValueType<ForwardIt, std::string> start,
+				// both args cannot use SFINAE (and luckily don't have to) due to inability to infer ForwardIt
 				ForwardIt end,
 				size_type size);
 
 			virtual ~SingleProgram() override;
 
+			/// Execute the single program.
 			virtual void run() const override;
+			/// Obtains a command in the form of a list of space separated elements for displaying.
 			virtual std::deque<std::string> show() override;
 	};
 

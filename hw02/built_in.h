@@ -5,6 +5,7 @@
 
 namespace shell
 {
+	/// Sum type for all the built in Command%s
 	struct BuiltIn
 	{
 		enum TAG : short
@@ -16,7 +17,13 @@ namespace shell
 
 		union Data
 		{
+			/// Index for the history command.
+			/**
+			 * \sa Shell::runHistory()
+			 */
 			int histIndex;
+
+			/// Erorr message for BUILT_IN_ERROR
 			std::string what;
 
 			Data() {}
@@ -26,9 +33,7 @@ namespace shell
 
 		BuiltIn() : tag(NO_COMMAND) {}
 
-		// does not stop segfaults unless you use placment new to set what /shrug
 		BuiltIn(TAG tag) : tag(tag) {}
-		//{ if(tag == BUILT_IN_ERROR) new(&data.what) std::string{}; }
 
 		~BuiltIn()
 		{ if(tag == BUILT_IN_ERROR) data.what.~basic_string(); }
@@ -37,6 +42,7 @@ namespace shell
 		BuiltIn(const BuiltIn& builtIn)
 		{ *this = builtIn; }
 
+		/// Returns a string representation of the built in command.
 		std::string toString() const;
 	};
 }
