@@ -40,13 +40,12 @@ namespace shell
 		{
 			if(!runInBackground)
 			{
-				wait(NULL);
+				waitpid(pid, nullptr, 0);
 			}
 		}
 		else
 		{
 			std::cerr << "fork error: " << errno << "\n";
-			// fork error
 		}
 	}
 
