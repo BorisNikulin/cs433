@@ -64,8 +64,8 @@ namespace shell
 				return {true, 0};
 			case BuiltIn::HISTORY:
 				return runHistory(builtIn.data.histIndex);
-			case BuiltIn::BUILT_IN_ERROR:
-				//std::cout << builtIn.toString() << "\n";
+			case BuiltIn::ERROR:
+				std::cout << builtIn.toString() << "\n";
 				return {false, 1};
 			default:
 				std::cout << "Unknown BUILT_IN value\n";

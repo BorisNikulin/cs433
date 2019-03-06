@@ -55,7 +55,7 @@ namespace shell
 
 			/// Interprets one line of input.
 			/**
-			 * \param cmdStr one line of input with out a trailing new line
+			 * \param cmdStr one line of input with out a trailing new line.
 			 * \return A pair where the first is a boolean for requesting Shell exit
 			 * and the second being program return codes in the `POSIX` style.
 			 */

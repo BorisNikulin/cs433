@@ -51,5 +51,9 @@ namespace shell
 
 		/// Obtains a command in the form of a list of space separated elements for displaying.
 		std::deque<std::string> show() const;
+
+		/// Checks whether the command reprints the built in no command command.
+		bool isNoCommand() const noexcept
+		{ return tag == BUILT_IN && data.built_in.tag == BuiltIn::NO_COMMAND; }
 	};
 }

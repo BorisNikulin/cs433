@@ -10,7 +10,7 @@ namespace shell
 	{
 		enum TAG : short
 		{
-			NO_COMMAND, EXIT, HISTORY, BUILT_IN_ERROR
+			NO_COMMAND, EXIT, HISTORY, ERROR
 		};
 
 		TAG tag;
@@ -23,7 +23,7 @@ namespace shell
 			 */
 			int histIndex;
 
-			/// Erorr message for BUILT_IN_ERROR
+			/// Error message for ERROR
 			std::string what;
 
 			Data() {}
@@ -33,10 +33,11 @@ namespace shell
 
 		BuiltIn() : tag(NO_COMMAND) {}
 
-		BuiltIn(TAG tag) : tag(tag) {}
+		BuiltIn(TAG tag) : tag(tag)
+		{ if(tag == ERROR) new(&data.what) std::string; }
 
 		~BuiltIn()
-		{ if(tag == BUILT_IN_ERROR) data.what.~basic_string(); }
+		{ if(tag == ERROR) data.what.~basic_string(); }
 
 		BuiltIn& operator=(const BuiltIn& builtIn);
 		BuiltIn(const BuiltIn& builtIn)

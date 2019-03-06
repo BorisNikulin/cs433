@@ -15,8 +15,8 @@ namespace shell
 			case HISTORY:
 				data.histIndex = builtIn.data.histIndex;
 				break;
-			case BUILT_IN_ERROR:
-				//std::cout << "copy: " << builtIn.data.what << "\n";
+			case ERROR:
+				//std::couO << "copy: " << builtIn.data.what << "\n";
 				new(&data.what) std::string(builtIn.data.what);
 				break;
 			default:
@@ -44,7 +44,7 @@ namespace shell
 				}
 				return ss.str();
 			}
-			case BuiltIn::BUILT_IN_ERROR:
+			case BuiltIn::ERROR:
 				return data.what;
 			default:
 				return "Unknown BUILT_IN";
