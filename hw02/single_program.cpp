@@ -60,6 +60,11 @@ namespace shell
 			++currentArg;
 		}
 
+		if(runInBackground)
+		{
+			args.push_back("&");
+		}
+
 		return args;
 	}
 }
