@@ -1,0 +1,115 @@
+\documentclass{article}
+
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{listings}
+\usepackage{lstautogobble}
+\lstset{autogobble=true}
+
+\usepackage[usenames, dvipsnames]{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=magenta,
+	urlcolor=cyan!80!black,
+	citecolor=orange!80!black,
+}
+
+%\DeclareMathOperator{\bigO}{\mathcal{O}}
+
+\title{CS 433 (2) HW2 Report}
+\date{2019-03-06}
+\author{Boris Nikulin}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{B Shell Usage}
+
+The shell works similarly to other shells.
+The builtin commands include:
+
+\begin{itemize}
+	\item
+		\texttt{exit} or \texttt{Ctrl-d}
+		\begin{itemize}
+			\item This command exits the shell.
+		\end{itemize}
+	\item
+		\texttt{history} or \texttt{!!}
+		\begin{itemize}
+			\item This command lists the previous commands with an it's index in the history.
+			\item This command takes an optional integer.
+				\begin{itemize}
+					\item
+						If the integer is supplied, the history with that index is attempted to be run.
+					\item
+						The integer must be positive and only reference previous commands.
+				\end{itemize}
+		\end{itemize}
+\end{itemize}
+
+\section{B Shell Architecture}
+
+The entry point for the application is through the \texttt{Shell} class.
+\texttt{Shell} then uses the \texttt{shell::parse} namespace to parse the given line of input into a \texttt{Command}.
+
+A \texttt{Command} is the primary unit of logic.
+A \texttt{Command} object determines what should happen.
+Since the object needs to support both actual programs for the operating system to run as well as built in commands,
+which have different representations and arguments,
+I decided to use a sum type or tagged union to represent a \texttt{Command}.
+Thus, a Command either represents some built in command or a program.
+In Haskell syntax this looks like:
+\begin{lstlisting}[language=Haskell]
+	-- Command is a type, CmdBuiltIn is a constructor,
+	-- and BuiltIn is the type of the one and only
+	-- argument to the constructor
+	data Command = CmdBuiltIn BuiltIn
+	             | CmdProgramCmd Program
+\end{lstlisting}
+
+Built in commands also have varying forms, so I used another sum type.
+In Haskell syntax it would look like:
+
+\begin{lstlisting}[language=Haskell]
+	data BuiltIn = BuiltInNoCommand
+	             | BuiltInExit
+	             -- Maybe Int was represented in C++
+	             -- as negative numbers being Nothing
+	             -- and Just <int> as positive integers
+	             | BuiltInHist (Maybe Int)
+	             | BuiltInError String
+\end{lstlisting}
+
+I choose to represent errors as a built in command because I already had the framework to support
+pattern matching on built in commands already implemented in the \texttt{Shell} class.
+
+The no command built in was really helpful for signalling parse failures
+as well as allowing empty input to not need special handling as an empty input becomes a first class command.
+
+For representing real programs, the necessary data is mostly the same:
+the program location and arguments.
+Thus, I opted to use more traditional OOP constructs.
+\texttt{Program} is an abstract class that defines the necessary basics for all programs.
+
+\texttt{SingleProgram} is a class that is the base class for all runnable programs.
+It represents a single program to be run.
+
+Further plans include adding a \texttt{PipedProgram} as a child of \texttt{Program}
+that would store a list of \texttt{SingleProgram}s and then sequence them together with UNIX pipes.
+However, I ran out of time to get that far.
+
+\section{Notable Items}
+\texttt{wait()} did not work reliably consecutively.
+Running multiple processes in the background would cause subsequent processes to be run in the background.
+Waiting directly on the child through \texttt{waitpid()} fixed that issue.
+
+Documentation is available in HTML form in the \texttt{docs} directory.
+
+Parsing using primitive string operations is a massive pain.
+{\scriptsize Haskell's monadic parser combinators are too nice and make everything else seem so lackluster.}
+\end{document}
