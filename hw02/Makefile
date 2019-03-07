@@ -8,10 +8,10 @@ all: bsh documentation report.pdf
 documentation: Doxyfile *.h *.hpp *.cpp
 	doxygen
 
-shell.o: shell.cpp parser.h command.h
+shell.o: shell.cpp parser.hpp command.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-parser.o: parser.cpp parser.h command.h program.h single_program.hpp
+parser.o: parser.cpp parser.hpp command.h program.h single_program.hpp
 	$(CXX) $(CXXFLAGS) -c $<
 
 built_in.o: built_in.cpp built_in.h

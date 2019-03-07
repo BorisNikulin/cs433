@@ -56,4 +56,6 @@ namespace shell
 		bool isNoCommand() const noexcept
 		{ return tag == BUILT_IN && data.built_in.tag == BuiltIn::NO_COMMAND; }
 	};
+
+	Command makeError(const std::string& what);
 }

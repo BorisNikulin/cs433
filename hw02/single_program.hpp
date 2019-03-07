@@ -1,8 +1,8 @@
 #pragma once
 
 #include "program.h"
+#include "util.hpp"
 
-#include <type_traits>
 #include <iterator>
 #include <deque>
 #include <string>
@@ -10,16 +10,6 @@
 
 namespace shell
 {
-
-	template<typename Iter, typename T>
-	using IterWithValueType =
-		typename std::enable_if<
-			std::is_same<
-				typename std::iterator_traits<Iter>::value_type,
-				T
-			>::value,
-			Iter
-		>::type;
 
 	/// A Program consisting of one and only one executable.
 	/**

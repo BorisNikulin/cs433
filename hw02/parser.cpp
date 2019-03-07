@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "parser.hpp"
 
 #include "command.h"
 #include "program.h"
@@ -7,45 +7,59 @@
 #include <algorithm>
 #include <string>
 #include <deque>
-#include <memory>
 
 #include <iostream>
 
 namespace shell { namespace parse
 {
-	Command parseCommand(const std::string cmdStr)
+	Command parseCommand(const std::string& cmdStr)
 	{
-		// trim whitepace
+		Command cmd;
 		std::string trimmedCmdStr = cmdStr;
-		const auto whiteSpace = " \t\n";
-		std::string::size_type whiteSpaceIndex;
-		auto createNoCommand = []() -> Command
+		trim(trimmedCmdStr);
+
+		if(trimmedCmdStr.empty())
 		{
-			Command cmd;
 			cmd.tag = Command::BUILT_IN;
 			cmd.data.built_in = BuiltIn(BuiltIn::NO_COMMAND);
 			return cmd;
 		};
 
-		if((whiteSpaceIndex = trimmedCmdStr.find_first_not_of(whiteSpace)) != std::string::npos)
+		if(!(cmd = parseNoArgBuiltIn(trimmedCmdStr)).isNoCommand())
 		{
-			trimmedCmdStr.erase(0, whiteSpaceIndex);
+			return cmd;
+		}
+
+		return parseCommandWithArgs(trimmedCmdStr);
+	}
+
+	void trim(std::string& str)
+	{
+		std::string::size_type whiteSpaceIndex;
+
+		if((whiteSpaceIndex = str.find_first_not_of(whiteSpace)) != std::string::npos)
+		{
+			str.erase(0, whiteSpaceIndex);
 		}
 		else
 		{
-			return createNoCommand();
+			str.clear();
+			return;
 		}
 
-		if((whiteSpaceIndex = trimmedCmdStr.find_last_not_of(whiteSpace)) != std::string::npos)
+		if((whiteSpaceIndex = str.find_last_not_of(whiteSpace)) != std::string::npos)
 		{
-			trimmedCmdStr.erase(whiteSpaceIndex + 1);
+			str.erase(whiteSpaceIndex + 1);
 		}
 		else
 		{
-			return createNoCommand();
+			str.clear();
+			return;
 		}
+	}
 
-		// built in commands parsing
+	Command parseNoArgBuiltIn(const std::string& trimmedCmdStr)
+	{
 		std::string copy(trimmedCmdStr);
 		std::transform(copy.begin(), copy.end(), copy.begin(), tolower);
 
@@ -66,12 +80,15 @@ namespace shell { namespace parse
 			return cmd;
 		}
 
-		// program parsing and history with arg parsing
+		return Command{};
+	}
+
+	Command parseCommandWithArgs(const std::string& trimmedCmdStr)
+	{
+		Command cmd;
 		std::deque<std::string> args;
 		std::string::size_type separatorIndex;
 		std::string::size_type lastIndex = 0;
-		Command cmd;
-		bool runInBackground = false;
 
 		while((separatorIndex = trimmedCmdStr.find_first_of(whiteSpace, lastIndex)) != std::string::npos)
 		{
@@ -84,7 +101,20 @@ namespace shell { namespace parse
 			args.push_back(trimmedCmdStr.substr(lastIndex, std::string::npos));
 		}
 
-		// parse built in history with arguemnt
+
+		if(!(cmd = parseBuiltinWithArgs(args)).isNoCommand())
+		{
+			return cmd;
+		}
+
+
+		return parseProgram(args.begin(), args.end());
+	}
+
+	Command parseBuiltinWithArgs(const std::deque<std::string>& args)
+	{
+		Command cmd;
+
 		if(args.size() == 2 && (args[0] == "history" || args[0] == "!!"))
 		{
 			BuiltIn hist(BuiltIn::HISTORY);
@@ -94,28 +124,14 @@ namespace shell { namespace parse
 			}
 			catch(...)
 			{
-				BuiltIn error(BuiltIn::BUILT_IN_ERROR);
-				error.data.what = "history: invalid history index";
-
-				cmd.tag = Command::BUILT_IN;
-				cmd.data.built_in = error;
-				return cmd;
+				return makeError("history: invalid history index");
 			}
 
 			cmd.tag = Command::BUILT_IN;
 			cmd.data.built_in = hist;
 			return cmd;
 		}
-		else if(args.size() > 0 && args.back() == "&")
-		{
-			runInBackground = true;
-			args.pop_back();
-		}
 
-		cmd.tag = Command::PROGRAM;
-		cmd.data.program = new SingleProgram(args.begin(), args.end(), args.size());
-		cmd.data.program->runInBackground = runInBackground;
-
-		return cmd;
+		return Command{};
 	}
 } }

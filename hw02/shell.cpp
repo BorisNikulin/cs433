@@ -1,7 +1,7 @@
 #include "shell.h"
 
 #include "command.h"
-#include "parser.h"
+#include "parser.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -17,24 +17,29 @@ namespace shell
 	{
 		Command cmd = parse::parseCommand(cmdStr);
 
-		// allow only stricly monotonically decreasing history references to prevent loops and thus segfaults
-		if(cmd.tag == Command::BUILT_IN
-			&& cmd.data.built_in.tag == BuiltIn::HISTORY
-			&& cmd.data.built_in.data.histIndex >= static_cast<int>(history.size()))
+		if(cmd.tag == Command::BUILT_IN)
 		{
-			std::cout << "history: no references to current or future commands\n";
-			return {false, 1};
+			switch(cmd.data.built_in.tag)
+			{
+				case BuiltIn::NO_COMMAND:
+					return {false, 0};
+				case BuiltIn::ERROR:
+					runBuiltIn(cmd.data.built_in);
+					return {false, 1};
+				case BuiltIn::HISTORY:
+					if(cmd.data.built_in.data.histIndex >= static_cast<int>(history.size()))
+					{
+						std::cout << "history: no references to current or future commands\n";
+						return {false, 1};
+					}
+					break;
+				default:
+					break;
+			}
 		}
-		else if(cmd.tag == Command::BUILT_IN
-			&& cmd.data.built_in.tag == BuiltIn::NO_COMMAND)
-		{
-			return {false, 0};
-		}
-		else
-		{
-			history.push_back(std::move(cmd));
-			return runCommand(history.back());
-		}
+
+		history.push_back(std::move(cmd));
+		return runCommand(history.back());
 	}
 
 	std::pair<bool, int> Shell::runCommand(const Command& cmd)
