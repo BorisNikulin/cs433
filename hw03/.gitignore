@@ -1,0 +1,8 @@
+*.tex
+figure/*
+
+docs/*
+
+*.csv
+
+os_sim
