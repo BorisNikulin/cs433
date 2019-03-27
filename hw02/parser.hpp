@@ -35,14 +35,14 @@ namespace parse
 
 	/// Parses any built in command that does not take arguments.
 	/**
-	 * \param trimmedCmdStr single line of input trimmed of white space on both sides.
+	 * \param trimedCmdStr single line of input trimmed of whitespace on both sides.
 	 * \returns A command that may be the built in no command if there is nothing to parse.
 	 */
 	Command parseNoArgBuiltIn(const std::string& trimmedCmdStr);
 
 	/// Parses any command that takes arguments.
 	/**
-	 * \param trimmedCmdStr single line of input trimmed of white space on both sides.
+	 * \param trimedCmdStr single line of input trimmed of whitespace on both sides.
 	 * \returns A command suitable to be run.
 	 */
 	Command parseCommandWithArgs(const std::string& trimmedCmdStr);
@@ -72,8 +72,80 @@ namespace parse
 			--end;
 		}
 
+		auto findRedirectChar = [](const std::string& s) -> int
+		{
+			if(s.size() > 0)
+			{
+				if(s.front() == '<' || s.front() == '>')
+				{
+					return 0;
+				}
+				else if(s.size() > 1)
+				{
+					return s[1] == '<' || s[1] == '>' ? 1 : -1;
+				}
+			}
+
+			return -1;
+		};
+
+		int lastRedirectCharIndex;
+		auto isRedirectToken = [&](const std::string& s)
+		{
+			lastRedirectCharIndex = findRedirectChar(s);
+			return lastRedirectCharIndex != -1;
+		};
+
+
+		auto firstRedirect = std::find_if(start, end, isRedirectToken);
+
+		int streamToRedirect;
+		if(lastRedirectCharIndex != -1)
+		{
+			std::string file;
+
+			if(lastRedirectCharIndex == 0)
+			{
+				if(firstRedirect->front() == '<')
+				{
+					streamToRedirect = STDIN_FILENO;
+				}
+				else
+				{
+					streamToRedirect = STDOUT_FILENO;
+				}
+
+				auto next = firstRedirect;
+				++next;
+
+				if(next != end)
+				{
+
+				}
+				else
+				{
+					return makeError("redirection must name a file");
+				}
+
+			}
+			else if(lastRedirectCharIndex > 0)
+			{
+				if((*firstRedirect)[lastRedirectCharIndex] == '>')
+				{
+					streamToRedirect = firstRedirect->front() - '0';
+				}
+				else
+				{
+					return makeError("redirection of input only allowed for standard input");
+				}
+			}
+		}
+
+		std::cout << "redir: " << streamToRedirect << "\n";
+
 		cmd.tag = Command::PROGRAM;
-		cmd.data.program = new SingleProgram(start, end, std::distance(start, end));
+		// assumes redirection is at the end or just before &
+		cmd.data.program = new SingleProgram(start, firstRedirect, std::distance(start, firstRedirect));
 		cmd.data.program->runInBackground = runInBackground;
 
 		return cmd;
