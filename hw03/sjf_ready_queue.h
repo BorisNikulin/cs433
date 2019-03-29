@@ -26,7 +26,7 @@ namespace sim
 			std::priority_queue<
 				TimeProcPair,
 				std::vector<TimeProcPair>,
-				decltype(sjfThenTimeComp)> readyQueue;
+				decltype(sjfThenTimeComp)> readyQueue{sjfThenTimeComp};
 
 		public:
 			bool empty() const noexcept
