@@ -8,8 +8,6 @@ namespace sim
 	{
 		procid_t pid;
 
-		UnitDuration startTime;
-
 		UnitDuration totalCpuDuration;
 		UnitDuration remainingCpuDuration;
 
