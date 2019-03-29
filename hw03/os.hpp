@@ -32,7 +32,6 @@ namespace sim
 
 			/// Checks for an avaiable cpu and tries to run the first Process in the run queue.
 			Events tryRunProcess(UnitDuration startTime);
-			Events ioBlockProcess(UnitDuration startTime, Process* proc);
 
 		public:
 			OS(RngGen gen) : nextPid(0), random(gen)
@@ -107,16 +106,6 @@ namespace sim
 	}
 
 	template<typename RngGen, typename ProcessScheduler>
-	Events OS<RngGen, ProcessScheduler>::ioBlockProcess(UnitDuration startTime, Process* proc)
-	{
-		Events returnEvents;
-
-		ioQueue.pushProcess(startTime, proc);
-
-		return returnEvents;
-	}
-
-	template<typename RngGen, typename ProcessScheduler>
 	Events OS<RngGen, ProcessScheduler>::handleEvent(Event e)
 	{
 		Events returnEvents;
@@ -129,7 +118,6 @@ namespace sim
 				auto meanCpuBurst = random.meanCpuBurst();
 				std::unique_ptr<Process> proc(new Process{
 					nextPid,
-					random.newProcessStart(),
 					totalCpuDuration,
 					totalCpuDuration,
 					meanCpuBurst,
@@ -158,7 +146,6 @@ namespace sim
 				proc->remainingCpuDuration -= cpuTime;
 				procStats.cpuTime += cpuTime;
 
-
 				if(proc->remainingCpuDuration <= UnitDuration(0))
 				{
 					procStats.finishTime = e.time;
@@ -179,6 +166,8 @@ namespace sim
 
 					returnEvents.push_front(ioEvent);
 				}
+
+				returnEvents.splice_after(returnEvents.before_begin(), tryRunProcess(e.time));
 				break;
 			}
 			case Event::IO_COMPLETION:
@@ -188,13 +177,13 @@ namespace sim
 				UnitDuration ioTimeStart = ioTimeAndProc.first;
 				Process* proc = ioTimeAndProc.second;
 
-
 				ProcessStats& procStats = stats.processStatsById(proc->pid);
 				auto ioTime = e.time - ioTimeStart;
 				procStats.ioTime += ioTime;
 
 				readyQueue.pushProcess(e.time, proc);
 
+				returnEvents.splice_after(returnEvents.before_begin(), tryRunProcess(e.time));
 				break;
 			}
 			default:
