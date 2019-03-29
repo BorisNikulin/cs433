@@ -3,13 +3,57 @@
 #include "event_queue.h"
 #include "os.hpp"
 #include "fcfs_ready_queue.h"
+#include "sjf_ready_queue.h"
 #include "stats.h"
 
 #include <random>
 #include <iostream>
 #include <cstdlib>
+#include <unordered_map>
+#include <fstream>
+#include <string>
 
-#include "sum_count.hpp"
+void printStats(std::unordered_map<sim::procid_t, sim::ProcessStats>& procStats)
+{
+	using namespace std;
+	using namespace sim;
+
+	for(auto pidStats : procStats)
+	{
+		procid_t pid = pidStats.first;
+		ProcessStats& procStats = pidStats.second;
+
+		cout << "------------\n"
+			<< "Process ID: " << pid << "\n"
+			<< "Arrival time: " << procStats.arrivalTime.count() << "\n"
+			<< "CPU time: " << procStats.cpuTime.count() << "\n"
+			<< "IO time: " << procStats.ioTime.count() << "\n"
+			<< "Wait time: " << procStats.waitTime.count() << "\n";
+	}
+
+	cout << "------------\n";
+}
+
+void writeCSVData(
+	std::ostream& out,
+	const char* schedulerType,
+	std::unordered_map<sim::procid_t, sim::ProcessStats>& procStats)
+{
+	using namespace sim;
+
+	for(auto pidStats : procStats)
+	{
+		procid_t pid = pidStats.first;
+		ProcessStats& procStats = pidStats.second;
+
+		out << schedulerType << ", "
+			<< pid << ", "
+			<< procStats.arrivalTime.count() << ", "
+			<< procStats.cpuTime.count() << ", "
+			<< procStats.ioTime.count() << ", "
+			<< procStats.waitTime.count() << "\n";
+	}
+}
 
 int main(int argc, char* argv[])
 {
@@ -38,32 +82,44 @@ int main(int argc, char* argv[])
 	cout << "OS Sim by Boris Nikulin.\n"
 		<< "Running with " << numProcesses << " processes.\n";
 
+	string outFilePath = "os_sim_";
+	outFilePath += to_string(numProcesses) + ".csv";
+	ofstream outCsv(outFilePath, ios::trunc);
+	outCsv << "scheduler, pid, arrival, finish, cpu, io, wait\n";
+
 	const UnitDuration endTime = chrono::duration_cast<UnitDuration>(chrono::minutes(5));
-	EventQueue eventQueue;
-	OS<mt19937, FCFSReadyQueue> os(mt19937{});
 
-	eventQueue.pushEvents(os.newProcessEvents(numProcesses));
+	EventQueue fcfsEventQueue;
+	EventQueue sjfEventQueue;;
 
-	while(!eventQueue.empty() && eventQueue.time() < endTime)
+	OS<mt19937, FCFSReadyQueue> fcfsOS(mt19937{});
+	OS<mt19937, SJFReadyQueue> sjfOS(mt19937{});
+
+	fcfsEventQueue.pushEvents(fcfsOS.newProcessEvents(numProcesses));
+	sjfEventQueue.pushEvents(sjfOS.newProcessEvents(numProcesses));
+
+	while(!fcfsEventQueue.empty() && fcfsEventQueue.time() < endTime)
 	{
-		eventQueue.pushEvents(os.handleEvent(eventQueue.popEvent()));
+		fcfsEventQueue.pushEvents(fcfsOS.handleEvent(fcfsEventQueue.popEvent()));
 	}
 
-	for(auto pidStats : os.osStats().processStats())
+	while(!sjfEventQueue.empty() && sjfEventQueue.time() < endTime)
 	{
-		procid_t pid = pidStats.first;
-		ProcessStats procStats = pidStats.second;
-
-		cout << "------------\n"
-			<< "Process ID: " << pid << "\n"
-			<< "Arrival time: " << procStats.arrivalTime.count() << "\n"
-			<< "CPU time: " << procStats.cpuTime.count() << "\n"
-			<< "IO time: " << procStats.ioTime.count() << "\n"
-			<< "Wait time: " << procStats.waitTime.count() << "\n";
+		sjfEventQueue.pushEvents(sjfOS.handleEvent(sjfEventQueue.popEvent()));
 	}
 
-	cout << "------------\n";
+	cout << "Times are in ms.\n\n";
+
+	cout << "FCFS\n";
+	printStats(fcfsOS.osStats().processStats());
+	writeCSVData(outCsv, "FCFS", fcfsOS.osStats().processStats());
 	cout << endl;
+
+	cout << "SJF\n";
+	printStats(sjfOS.osStats().processStats());
+	writeCSVData(outCsv, "SJF", sjfOS.osStats().processStats());
+	cout << endl;
+
 	cout << "See report for analysis.\n";
 
 	return 0;
