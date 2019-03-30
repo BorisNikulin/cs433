@@ -1,0 +1,227 @@
+\documentclass{article}
+
+\usepackage{parskip}
+\usepackage{siunitx}
+
+\usepackage[usenames, dvipsnames]{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan!80!black,
+    citecolor=orange!80!black,
+}
+
+<<global_options, include = F>>=
+knitr::opts_chunk$set(warning = F, message = F)
+knitr::opts_chunk$set(fig.align = 'center', fig.width = 4, fig.height = 3)
+@
+
+\title{CS 433 (2) HW3 Report}
+\date{2019-03-29}
+\author{Boris Nikulin}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Data Analysis}
+
+
+\subsection{Data Import}
+
+First we load the simulation data,
+filter out processes that never finished,
+and give the data a once over.
+
+<<load-data>>=
+library(readr)
+library(dplyr)
+library(magrittr)
+
+col_spec <- cols(
+    scheduler = col_character(),
+    pid = col_integer(),
+    arrival = col_integer(),
+    finish = col_integer(),
+    cpu = col_integer(),
+    io = col_integer(),
+    wait = col_integer()
+)
+
+data10 <- read_csv('./os_sim_10.csv', col_types = col_spec)
+data20 <- read_csv('./os_sim_20.csv', col_types = col_spec)
+data100 <- read_csv('./os_sim_100.csv', col_types = col_spec)
+data1000 <- read_csv('./os_sim_1000.csv', col_types = col_spec)
+
+data10$num_procs <- 10
+data20$num_procs <- 20
+data100$num_procs <- 100
+data1000$num_procs <- 1000
+
+glimpse(data10, width = 60)
+glimpse(data20, width = 60)
+glimpse(data100, width = 60)
+glimpse(data1000, width = 60)
+
+data <- rbind(data10, data20, data100, data1000) %>%
+    # filter out processes that never finished
+    filter(finish != 0) %>%
+    # convert ms to s
+    mutate_at(.funs = list(~./1000), .vars = 3:7) %>%
+    # col spec of col_factor() doesnt seem to work
+    mutate(scheduler = as.factor(scheduler),
+        turnaround = finish - arrival)
+
+glimpse(data, width = 60)
+@
+
+
+The times are in seconds.
+
+<<data-summary, results='asis'>>=
+library(xtable)
+
+data_summary <- data %>%
+    group_by(scheduler, num_procs) %>%
+    summarise(
+        mean_arrival = mean(arrival),
+        sd_arrival = sd(arrival),
+        mean_finish = mean(finish),
+        sd_finish = sd(finish),
+        mean_cpu = mean(cpu),
+        sd_cpu = sd(cpu),
+        mean_io = mean(io),
+        sd_io = sd(io),
+        mean_wait = mean(wait),
+        sd_wait = sd(wait),
+        mean_turnaround = mean(turnaround),
+        sd_turnaround = sd(turnaround),
+        throughput = n() / (max(finish) - min(arrival))
+    )
+
+data_summary %>%
+    select(scheduler, num_procs, mean_arrival:sd_arrival) %>%
+    xtable()
+data_summary %>%
+    select(scheduler, num_procs, mean_finish:sd_finish) %>%
+    xtable()
+data_summary %>%
+    select(scheduler, num_procs, mean_cpu:sd_io) %>%
+    xtable()
+data_summary %>%
+    select(scheduler, num_procs, mean_wait:sd_wait) %>%
+    xtable()
+data_summary %>%
+    select(scheduler, num_procs, mean_turnaround:throughput) %>%
+    xtable()
+@
+% prevent tables from floating too far
+\clearpage
+
+
+\subsection{Data Visualization}
+
+Next we plot the data using density plots and line plots.
+
+<<data-plot-density, fig.height=5>>=
+library(ggplot2)
+
+ggplot(data, aes(turnaround)) +
+    geom_density() +
+    labs(x = 'Turnaround Time (s)', y = 'Density') +
+    facet_grid(num_procs~scheduler)
+
+ggplot(data, aes(cpu)) +
+    geom_density() +
+    labs(x = 'CPU Time (s)', y = 'Density') +
+    facet_grid(num_procs~scheduler)
+
+ggplot(data, aes(wait)) +
+    geom_density() +
+    labs(x = 'Wait Time (s)', y = 'Density') +
+    facet_grid(num_procs~scheduler)
+
+ggplot(data, aes(io)) +
+    geom_density() +
+    labs(x = 'I/O Time (s)', y = 'Density') +
+    facet_grid(num_procs~scheduler)
+@
+
+The density plots for FCFS at 1000 processes does not contain anything
+because when the small CPU burst finishes, the processes has to
+wait for IO and all the processes already in the ready queue which is a staggering number.
+Thus, every processes blocks each other for a very long time ---
+longer than the simulation duration of \SI{5}{\min} ---
+and no process can complete.
+
+<<data-plot-line>>=
+ggplot(data_summary,
+        aes(
+            num_procs,
+            throughput,
+            color = scheduler)) +
+    geom_point() +
+    geom_line() +
+    labs(
+        x = 'Number of Processes',
+        y = 'Throughput (processes/s)',
+        color = 'Scheduler')
+
+ggplot(data_summary,
+        aes(
+            num_procs,
+            mean_turnaround,
+            color = scheduler)) +
+    geom_point() +
+    geom_line() +
+    labs(
+        x = 'Number of Processes',
+        y = 'Mean Turnaround Time (s)',
+        color = 'Scheduler')
+
+ggplot(data_summary,
+        aes(num_procs,
+            mean_wait,
+            color = scheduler)) +
+    geom_point() +
+    geom_line() +
+    labs(
+        x = 'Number of Processes',
+        y = 'Mean Wait Time (s)',
+        color = 'Scheduler')
+
+ggplot(data_summary,
+        aes(num_procs,
+            mean_io,
+            color = scheduler)) +
+    geom_point() +
+    geom_line() +
+    labs(
+        x = 'Number of Processes',
+        y = 'Mean I/O Time (s)',
+        color = 'Scheduler')
+@
+
+
+\section{Scheduling Algorithm Analysis}
+
+From the throughput vs. number of processes graph,
+one can see that at a sufficiently small number of processes,
+FCFS does a better job at maximizing throughput.
+However, when the number of processes is too high,
+the time to traverse the ready queue in FCFS is incredibly high.
+This leads to FCFS failing drastically.
+Conversely, SJF doesn't beat FCFS on throughput, but is
+stable under a large amount of processes.
+
+From the mean wait time vs. number of processes,
+one can see that SJF is clearly better at minimizing wait times.
+Also, as noted before, SJF does not choke on a large amount of processes.
+
+In conclusion, FCFS maximizes throughput and SJF minimizes wait times.
+However, with limited resources and a sufficiently large amount of processes,
+FCFS grinds to a halt.
+\end{document}
