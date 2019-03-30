@@ -1,5 +1,5 @@
 CCX = gcc
-CXXFLAGS = -std=c++11 -Wall -g
+CXXFLAGS = -std=c++11 -Wall -O3
 
 .PHONY: all
 all: report.pdf
@@ -39,7 +39,10 @@ os_sim_20.csv: os_sim
 os_sim_100.csv: os_sim
 	./$< 100
 
-report.tex: report.Rnw os_sim_10.csv os_sim_20.csv os_sim_100.csv
+os_sim_1000.csv: os_sim
+	./$< 1000
+
+report.tex: report.Rnw os_sim_10.csv os_sim_20.csv os_sim_100.csv os_sim_1000.csv
 	R -e "knitr::knit('$<')"
 
 report.pdf: report.tex
