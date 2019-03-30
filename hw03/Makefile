@@ -24,7 +24,7 @@ sjf_ready_queue.o: sjf_ready_queue.cpp sjf_ready_queue.h types.h
 stats.o: stats.cpp stats.h types.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-main.o: main.cpp types.h event.h event_queue.h os.hpp fcfs_ready_queue.h sjf_ready_queue.h stats.h
+main.o: main.cpp types.h event.h event_queue.h os.hpp sim_random.hpp fcfs_ready_queue.h sjf_ready_queue.h stats.h
 	$(CXX) $(CXXFLAGS) -c $<
 
 os_sim: main.o event.o event_queue.o stats.o cpu.o io_queue.o fcfs_ready_queue.o sjf_ready_queue.o
@@ -37,7 +37,7 @@ os_sim_20.csv: os_sim
 	./$< 20
 
 os_sim_100.csv: os_sim
-	./$< 100
+	./$< 1000
 
 report.tex: report.Rnw os_sim_10.csv os_sim_20.csv os_sim_100.csv
 	R -e "knitr::knit('$<')"
