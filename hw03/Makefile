@@ -37,7 +37,7 @@ os_sim_20.csv: os_sim
 	./$< 20
 
 os_sim_100.csv: os_sim
-	./$< 1000
+	./$< 100
 
 report.tex: report.Rnw os_sim_10.csv os_sim_20.csv os_sim_100.csv
 	R -e "knitr::knit('$<')"
