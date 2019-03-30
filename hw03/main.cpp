@@ -49,6 +49,7 @@ void writeCSVData(
 		out << schedulerType << ", "
 			<< pid << ", "
 			<< procStats.arrivalTime.count() << ", "
+			<< procStats.finishTime.count() << ", "
 			<< procStats.cpuTime.count() << ", "
 			<< procStats.ioTime.count() << ", "
 			<< procStats.waitTime.count() << "\n";
