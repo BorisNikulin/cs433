@@ -146,7 +146,7 @@ namespace sim
 				proc->remainingCpuDuration -= cpuTime;
 				procStats.cpuTime += cpuTime;
 
-				if(proc->remainingCpuDuration <= UnitDuration(0))
+				if(proc->remainingCpuDuration <= UnitDuration::zero())
 				{
 					procStats.finishTime = e.time;
 

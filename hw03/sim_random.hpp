@@ -21,7 +21,7 @@ namespace sim
 			// see https://stackoverflow.com/questions/16008271/why-are-c11-random-distributions-mutable
 			UniformTimeDist
 				newProcessDist{
-					0,
+					UnitDuration::zero().count(),
 					time::duration_cast<UnitDuration>(time::minutes(5)).count()};
 
 			UniformTimeDist
