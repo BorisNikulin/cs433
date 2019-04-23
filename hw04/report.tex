@@ -1,0 +1,60 @@
+\documentclass{article}
+
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage[usenames, dvipsnames]{xcolor}
+
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=magenta,
+	urlcolor=cyan!80!black,
+	citecolor=orange!80!black,
+}
+
+
+\title{CS 433 (2) HW4 Report}
+\date{2019-04-22}
+\author{Boris Nikulin}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Solving the Producer Consumer Problem}
+
+To solve the producer consumer problem,
+I used a mutex and two condition variables.
+
+The buffer being produced and consumed to
+is uninitialized raw storage represented.
+
+
+\subsection{The Buffer}
+
+The buffer was made with uninitialized raw storage to
+prevent unnecessary initialization.
+
+The buffer is created using an array of bytes aligned to the element type.
+The buffer was handled manually as an exercise instead of using \texttt{std::aligned\_storage}.
+
+The buffer is used in a FIFO manner.
+
+
+\subsection{Synchronization}
+
+Synchronization is primarily attained through a single mutex.
+The single mutex is responsible for synchronizing access to the buffer.
+
+When the buffer is empty or full,
+threads wait on a non empty and a not full condition variables respectively.
+The conditions variables are signalled when
+an element has been popped off the FIFO buffer or
+when an element has been added.
+These two condition variables block when an action can not be possible,
+while the opposite action signals the condition variable and enabling the action.
+
+
+\end{document}
