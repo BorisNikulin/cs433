@@ -1,12 +1,12 @@
 #include "shared_stack.hpp"
 
-#include <random>
-#include <thread>
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <random>
+#include <thread>
 #include <vector>
-#include <algorithm>
 
 #include <pthread.h>
 
