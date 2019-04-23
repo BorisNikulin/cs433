@@ -10,10 +10,10 @@
 
 #include <pthread.h>
 
-const size_t BUFFER_SIZE = 10;
+const size_t BUFFER_SIZE = 5;
 concurrent::SharedStack<int, BUFFER_SIZE> stack;
 std::mt19937 gen;
-std::uniform_int_distribution<int> dist;
+std::uniform_int_distribution<int> dist(0, 99);
 
 bool run = true;
 
