@@ -63,15 +63,16 @@ namespace concurrent
 		T* tBuffer = reinterpret_cast<T*>(buffer);
 
 		cout << "[";
-		if(top == 1)
+		if(top >= 1)
 		{
 			cout << tBuffer[0];
 		}
-		else if(top > 1)
+
+		if(top > 1)
 		{
-			cout << tBuffer[0];
 			for_each(tBuffer + 1, tBuffer + top, [](const T& val){ cout <<  ", " << val; });
 		}
+
 		cout << "]";
 	}
 
@@ -81,7 +82,6 @@ namespace concurrent
 	{
 		using namespace std;
 
-		//UniqueLock{&mutex};
 		pthread_mutex_lock(&mutex);
 
 		cout << pthread_self() << ": ";
@@ -114,7 +114,6 @@ namespace concurrent
 	{
 		using namespace std;
 
-		//UniqueLock{&mutex};
 		pthread_mutex_lock(&mutex);
 
 		cout << pthread_self() << ": ";
