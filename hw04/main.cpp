@@ -94,26 +94,20 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	vector<pthread_t> threads;
-	threads.reserve(numProducers + numConsumers);
-
 	for(int i = 0; i < numProducers; ++i)
 	{
 		pthread_t t;
 		pthread_create(&t, nullptr, produce, nullptr);
-		threads.push_back(t);
 	}
 
 	for(int i = 0; i < numConsumers; ++i)
 	{
 		pthread_t t;
 		pthread_create(&t, nullptr, consume, nullptr);
-		threads.push_back(t);
 	}
 
 	this_thread::sleep_for(sleepSeconds);
 	run = false;
-	for_each(threads.begin(), threads.end(), [](pthread_t thread){ pthread_join(thread, nullptr); });
 
 	return 0;
 }
