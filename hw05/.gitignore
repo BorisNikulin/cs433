@@ -1,0 +1,8 @@
+*.tex
+figure/*
+
+docs/*
+
+*.csv
+
+paging_sim
