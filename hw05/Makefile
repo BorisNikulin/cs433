@@ -5,10 +5,19 @@ BIN = paging_sim
 .PHONY: all
 all: report.pdf
 
-main.o: main.cpp
+address.o: address.cpp address.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-$(BIN): main.o
+fifo.o: fifo.cpp fifo.h
+	$(CXX) $(CXXFLAGS) -c $<
+
+lru.o: lru.cpp lru.h
+	$(CXX) $(CXXFLAGS) -c $<
+
+main.o: main.cpp address.h memory.hpp fifo.h random.hpp lru.h
+	$(CXX) $(CXXFLAGS) -c $<
+
+$(BIN): main.o address.o fifo.o lru.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 paging_sim.csv: $(BIN)
