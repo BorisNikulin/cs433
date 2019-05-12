@@ -150,7 +150,8 @@ int main(int argc, char* argv[])
 	vector<Address> refs = loadMemoryReferenceFile(references);
 
 	Memory<replacement::FIFO> memoryFifo(pageOffsetNumBits, numPages, memNumBits);
-	Memory<replacement::Random<mt19937>> memoryRandom(pageOffsetNumBits, numPages, memNumBits, mt19937{}, numPages);
+	Memory<replacement::Random<mt19937>> memoryRandomMersenne(pageOffsetNumBits, numPages, memNumBits, mt19937{}, numPages);
+	Memory<replacement::Random<minstd_rand>> memoryRandomMinstd(pageOffsetNumBits, numPages, memNumBits,minstd_rand{}, numPages);
 	Memory<replacement::LRU> memoryLru(pageOffsetNumBits, numPages, memNumBits);
 
 	writeHeaderTsv(cout);
@@ -167,12 +168,23 @@ int main(int argc, char* argv[])
 		refs.end());
 
 	simulateMemory(
-		memoryRandom,
+		memoryRandomMersenne,
 		high_resolution_clock::now(),
 		numPages,
 		pageSizeBytes,
 		memorySizeBytes,
-		"random",
+		"rng:mt19937",
+		cout,
+		refs.begin(),
+		refs.end());
+
+	simulateMemory(
+		memoryRandomMinstd,
+		high_resolution_clock::now(),
+		numPages,
+		pageSizeBytes,
+		memorySizeBytes,
+		"rng:minstd_rand",
 		cout,
 		refs.begin(),
 		refs.end());
