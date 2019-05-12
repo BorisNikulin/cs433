@@ -51,7 +51,7 @@ namespace memory
 			<< '\n';
 	}
 
-	void writeLogTsv(std::ostream& os, Log l)
+	void writeLogTsv(std::ostream& os, const Log& l)
 	{
 		os << l.time.count()
 			<< '\t' << l.numPages
@@ -64,13 +64,13 @@ namespace memory
 	}
 
 	template<typename Memory, typename ForwardIt>
-	void simulateMemory(
+	void inline simulateMemory(
 		Memory& mem,
-		std::chrono::time_point<std::chrono::high_resolution_clock> startTime,
-		int numPages,
-		int pageSizeBytes,
-		int memorySizeBytes,
-		std::string replacementAlgorithm,
+		const std::chrono::time_point<std::chrono::high_resolution_clock> startTime,
+		const int numPages,
+		const int pageSizeBytes,
+		const int memorySizeBytes,
+		const std::string replacementAlgorithm,
 		std::ostream& os,
 		ForwardIt refsBegin,
 		ForwardIt refsEnd)
@@ -123,10 +123,10 @@ int main(int argc, char* argv[])
 			doExit = true;
 			cout << "<memory num bits> must be a number greater than 0\n";
 		}
-		if(pageOffsetNumBits < memNumBits)
+		if(pageOffsetNumBits >= memNumBits)
 		{
 			doExit = true;
-			cout << "<page num num bits> must be greater than or equal to <memory num bits>\n";
+			cout << "<page num num bits> must be greater than to <memory num bits>\n";
 		}
 
 		if(doExit)
@@ -152,12 +152,6 @@ int main(int argc, char* argv[])
 	Memory<replacement::FIFO> memoryFifo(pageOffsetNumBits, numPages, memNumBits);
 	Memory<replacement::Random<mt19937>> memoryRandom(pageOffsetNumBits, numPages, memNumBits, mt19937{}, numPages);
 	Memory<replacement::LRU> memoryLru(pageOffsetNumBits, numPages, memNumBits);
-
-	for(auto it = refs.begin(); it != refs.end(); ++it)
-	{
-		cout << *it << ", ";
-	}
-	 cout << endl;
 
 	writeHeaderTsv(cout);
 
