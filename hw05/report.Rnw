@@ -1,0 +1,141 @@
+\documentclass{article}
+
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage[binary-units]{siunitx}
+
+\usepackage[usenames, dvipsnames]{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan!80!black,
+    citecolor=orange!80!black,
+}
+
+<<global_options, include = F>>=
+#knitr::opts_chunk$set(warning = F, message = F)
+knitr::opts_chunk$set(fig.align = 'center', fig.width = 5, fig.height = 5)
+options(width = 65)
+@
+
+\title{CS 433 (2) HW5 Report}
+\date{2019-05-11}
+\author{Boris Nikulin}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Data Analysis}
+
+
+\subsection{Data Import}
+
+First we load the simulation data,
+filter out processes that never finished,
+and give the data a once over.
+
+However, using \texttt{readr::read\_tsv} to load the data take's minutes because
+the data per run is around \SI{1}{\giga\byte}.
+After all the runs of the simulation, the final dataset is \SI{4.2}{\giga\byte}.
+As a side note, the gzip comprised size of the whole data set is \SI{444}{\mega\byte}.
+For this reason, we will primarily use \texttt{data.table} instead of
+\texttt{readr} and \texttt{dplyr}.
+\texttt{data.table::fread} reads the whole dataset in \SIrange{10}{20}{\s}.
+
+<<load-data>>=
+library(data.table)
+library(dplyr)
+library(magrittr)
+
+data <- fread('paging_sim.tsv')
+
+data %<>% .[, time := time / 1E6]
+@
+
+% i have no idea why glimpse output in the same chunk as loading
+% produces invisible text (you can still copy the text)
+<<load-data-glimpse>>=
+glimpse(data)
+@
+
+The times are in seconds.
+
+
+\subsection{Data Analysis}
+
+<<data-summary, cache = T>>=
+run_group <- c(
+    'num_pages',
+    'page_size_bytes',
+    'memory_size_bytes',
+    'replacement_algorithm'
+)
+
+(data_time <- data[, .(time_max = max(time)), mget(run_group)])
+
+(data_event_count <- data[, .N, mget(append(run_group, 'event'))])
+data_event_count %<>% .[event != 'reference']
+@
+
+Another side note, awk takes around \SI{10}{\s} per simulation to generate the counts
+while \texttt{data.table} gets all the counts at once in under \SI{10}{\s}.
+
+
+\subsection{Data Visualization}
+
+<<plot-bar-counts>>=
+library(ggplot2)
+
+ggplot(data_event_count,
+        aes(event, N, fill = replacement_algorithm)) +
+    geom_col(position = 'dodge') +
+    facet_grid(memory_size_bytes ~ page_size_bytes) +
+    labs(x = 'Event', y = 'Count', fill = 'Algorithm')
+@
+
+rng:mt19937 refers to the C++ \texttt{random} library and
+is a 32 bit mersenne twister default constructed.
+rng:minst\_rand also corresponds to the \texttt{random} library and
+is the newer 1993 minimum standard LCG.
+It is also default constructed.
+
+The bar graph above has some key takeaways.
+Page size, shown in the horizontal facets,
+does not reduce the event counts nearly as much as memory size, show in the vertical facets.
+At the end of the day, more memory is best.
+
+Another takeaway is that when there is insufficient memory,
+page size has no effect or a small adverse affect on the number of events
+excluding the random algorithm.
+Page size does have an effect when memory size is not the limiting factor.
+
+Lastly, random page replacement is unfairly good for how simple the algorithm is
+and is primarily affected by page size unlike the other algorithms.
+
+<<plot-bar-times>>=
+ggplot(data_time, aes(replacement_algorithm, time_max)) +
+    geom_col() +
+    facet_grid(memory_size_bytes ~ page_size_bytes) +
+    labs(x = 'Algorithm', y = 'Time (s)') +
+    coord_flip()
+@
+
+The times for the final events,
+which included the time to log each event,
+are pretty similar.
+
+I expected LRU to take longer as LRU is the same FIFO queue,
+but with an extra table for book keeping.
+
+What surprised me was the two different random number generation algorithms
+taking nearly the same amount of time.
+I expected for the mersenne twister to take longer than the LCG
+due to the complexity differences between them.
+However, the LCG took around \SIrange{0}{0.1}{\s} longer in every case.
+
+
+\end{document}
