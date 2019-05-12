@@ -32,7 +32,9 @@ report.pdf: report.tex
 .PHONY: clean
 clean:
 	-latexmk -c
-	-rm *.tex
+	-rm paging_sim.tex
 	-rm -rf figures
+	-rm -rf cache
 	-rm *.o
+	-rm tmp*.tsv
 	-rm $(BIN)
