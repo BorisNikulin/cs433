@@ -15,7 +15,7 @@
 }
 
 <<global_options, include = F>>=
-#knitr::opts_chunk$set(warning = F, message = F)
+knitr::opts_chunk$set(warning = F, message = F)
 knitr::opts_chunk$set(fig.align = 'center', fig.width = 5, fig.height = 5)
 options(width = 65)
 @
@@ -40,8 +40,8 @@ and give the data a once over.
 
 However, using \texttt{readr::read\_tsv} to load the data take's minutes because
 the data per run is around \SI{1}{\giga\byte}.
-After all the runs of the simulation, the final dataset is \SI{4.2}{\giga\byte}.
-As a side note, the gzip comprised size of the whole data set is \SI{444}{\mega\byte}.
+After all the runs of the simulation, the final dataset is \SI{5.5}{\giga\byte}.
+As a side note, the gzip comprised size of the whole data set is \SI{544}{\mega\byte}.
 For this reason, we will primarily use \texttt{data.table} instead of
 \texttt{readr} and \texttt{dplyr}.
 \texttt{data.table::fread} reads the whole dataset in \SIrange{10}{20}{\s}.
