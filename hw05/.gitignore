@@ -1,5 +1,6 @@
 *.tex
 figure/*
+cache/*
 
 docs/*
 
