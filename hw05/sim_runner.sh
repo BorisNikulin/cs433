@@ -8,10 +8,18 @@ memPowers=(16 24 16 24)
 for i in ${!pagePowers[@]}
 do
 	cmd="$bin ${pagePowers[$i]} ${memPowers[$i]}"
-	echo "$cmd"
-	$cmd > "tmp$i.tsv"
-	awk -f summary.awk "tmp$i.tsv"
+	$cmd > "tmp$i.tsv" &
 done
+
+wait
+
+for i in ${!pagePowers[@]}
+do
+	cmd="$bin ${pagePowers[$i]} ${memPowers[$i]}"
+	awk -f summary.awk -v cmd="$cmd" "tmp$i.tsv" &
+done
+
+wait
 
 header=false
 
@@ -27,4 +35,3 @@ do
 done
 
 mv tmp.tsv paging_sim.tsv
-gzip paging_sim.tsv
