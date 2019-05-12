@@ -3,6 +3,6 @@ figure/*
 
 docs/*
 
-*.csv
+*.tsv
 
 paging_sim

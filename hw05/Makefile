@@ -20,10 +20,10 @@ main.o: main.cpp address.h memory.hpp fifo.h random.hpp lru.h
 $(BIN): main.o address.o fifo.o lru.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-paging_sim.csv: $(BIN)
-	./$(BIN)
+paging_sim.tsv: $(BIN) sim_runner.sh summary.awk
+	./sim_runner.sh ./$(BIN)
 
-report.tex: report.Rnw paging_sim.csv
+report.tex: report.Rnw paging_sim.tsv
 	R -e "knitr::knit('$<')"
 
 report.pdf: report.tex
