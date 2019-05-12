@@ -118,6 +118,8 @@ namespace memory
 
 				victimEntry.valid = false;
 
+				replacer.notifyNew(pageId);
+
 				events.push_back(Event(Event::REPLACE, victimPage));
 
 				if(victimEntry.dirty)
